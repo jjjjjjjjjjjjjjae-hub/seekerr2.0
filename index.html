@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2GIS Достар — Локация бөлісу</title>
+    <style>
+        :root { --2gis-green: #64b52d; --bg: #f8f9fa; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; font-family: sans-serif; overflow: hidden; }
+        
+        #map-container { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
+
+        /* Достар тізімі панелі */
+        .friends-panel {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: white; border-radius: 20px 20px 0 0;
+            box-shadow: 0 -5px 15px rgba(0,0,0,0.1);
+            z-index: 1000; padding: 15px;
+            max-height: 40%; overflow-y: auto;
+            transition: 0.3s ease;
+        }
+
+        .panel-handle {
+            width: 40px; height: 5px; background: #ccc;
+            border-radius: 10px; margin: 0 auto 10px;
+        }
+
+        .friend-item {
+            display: flex; align-items: center; padding: 10px 0;
+            border-bottom: 1px solid #eee; cursor: pointer;
+        }
+
+        .avatar {
+            width: 45px; height: 45px; border-radius: 50%;
+            background: #ddd; margin-right: 15px;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; color: white; border: 2px solid var(--2gis-green);
+        }
+
+        .friend-info { flex: 1; }
+        .friend-name { font-weight: bold; font-size: 16px; }
+        .friend-status { font-size: 12px; color: #777; }
+
+        .btn-add {
+            position: absolute; top: 20px; right: 20px;
+            background: var(--2gis-green); color: white;
+            border: none; border-radius: 50px; padding: 10px 20px;
+            font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 1001; cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<button class="btn-add">+ Дос қосу</button>
+
+<div id="map-container"></div>
+
+<div class="friends-panel">
+    <div class="panel-handle"></div>
+    <h3 style="margin: 0 0 10px 0;">Достар (3)</h3>
+    
+    <div id="friends-list">
+        <div class="friend-item" onclick="focusFriend(43.23, 76.88)">
+            <div class="avatar" style="background: #ff5722;">А</div>
+            <div class="friend-info">
+                <div class="friend-name">Азамат</div>
+                <div class="friend-status">📍 2 минут бұрын болды</div>
+            </div>
+        </div>
+
+        <div class="friend-item" onclick="focusFriend(43.25, 76.94)">
+            <div class="avatar" style="background: #2196f3;">М</div>
+            <div class="friend-info">
+                <div class="friend-name">Мұрат</div>
+                <div class="friend-status">📍 Қазір онлайн</div>
+            </div>
+        </div>
+
+        <div class="friend-item" onclick="focusFriend(43.22, 76.90)">
+            <div class="avatar" style="background: #9c27b0;">Д</div>
+            <div class="friend-info">
+                <div class="friend-name">Диана</div>
+                <div class="friend-status">📍 Үйде (Заряд 15%)</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://maps.api.2gis.ru/2.0/loader.js?pkg=full"></script>
+
+<script>
+    const GIS_KEY = 'b5fcfcbd-a7a4-4961-83ae-068675663751';
+    let map;
+
+    DG.then(function () {
+        map = DG.map('map-container', {
+            center: [43.238949, 76.889709],
+            zoom: 13,
+            zoomControl: false,
+            fullscreenControl: false
+        });
+
+        // Достардың маркерлері
+        addFriendMarker(43.23, 76.88, "Азамат", "#ff5722");
+        addFriendMarker(43.25, 76.94, "Мұрат", "#2196f3");
+        addFriendMarker(43.22, 76.90, "Диана", "#9c27b0");
+    });
+
+    function addFriendMarker(lat, lon, name, color) {
+        // Достың маркерін картаға қосу
+        DG.marker([lat, lon]).addTo(map).bindPopup(name);
+    }
+
+    function focusFriend(lat, lon) {
+        // Досты басқанда карта сол жерге жылжиды
+        map.setView([lat, lon], 16);
+    }
+</script>
+
+</body>
+</html>
+

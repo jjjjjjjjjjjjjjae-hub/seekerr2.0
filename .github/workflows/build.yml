@@ -8,17 +8,17 @@ jobs:
 
     steps:
       - name: Кодты алу
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Buildozer-мен APK жинау
-        uses: ArtemSerebrennikov/buildozer-action@v1
+        uses: ArtemSerebrennikov/buildozer-action@v1.6.1
         id: buildozer
         with:
           workdir: .
           buildozer_version: master
 
       - name: Дайын APK-ны сақтау (Upload Artifact)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Seeker-APK
           path: bin/*.apk
